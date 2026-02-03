@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-box {
+            background: white;
+            padding: 30px;
+            width: 320px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .login-box h2 {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-group i {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            transform: translateY(-50%);
+            color: #888;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px 10px 10px 40px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            border: none;
+            color: white;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .login-btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <h2>Login</h2>
+
+    <form method="post" action="/login">
+        <div class="input-group">
+            <i class="fa fa-user"></i>
+            <input type="text" name="username" placeholder="Username" required>
+        </div>
+
+        <div class="input-group">
+            <i class="fa fa-lock"></i>
+            <input type="password" name="password" placeholder="Password" required>
+        </div>
+
+        <button class="login-btn" type="submit">Login</button>
+    </form>
+</div>
+
+</body>
+</html>
