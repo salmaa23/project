@@ -32,22 +32,23 @@ public class TaskService {
 
     // ================= GET =================
 
+
     public List<TaskResponse> getAllTasks() {
         return taskRepository.findAll()
                 .stream()
-                .map(TaskResponse::fromEntity) // ✅ fixed
+                .map(TaskResponse::fromEntity)
                 .collect(Collectors.toList());
     }
 
     public TaskResponse getTaskById(Long id) {
         Task task = getTaskOrThrow(id);
-        return TaskResponse.fromEntity(task); // ✅ fixed
+        return TaskResponse.fromEntity(task);
     }
 
     public List<TaskResponse> getTasksByUserId(Long userId) {
         return taskRepository.findByUser_Id(userId)
                 .stream()
-                .map(TaskResponse::fromEntity) // ✅ fixed
+                .map(TaskResponse::fromEntity)
                 .collect(Collectors.toList());
     }
 
@@ -55,22 +56,21 @@ public class TaskService {
         TaskStatus taskStatus = parseStatus(status);
         return taskRepository.findByStatus(taskStatus)
                 .stream()
-                .map(TaskResponse::fromEntity) // ✅ fixed
+                .map(TaskResponse::fromEntity)
                 .collect(Collectors.toList());
     }
 
     public List<TaskResponse> searchByTitle(String title) {
         return taskRepository.findByTitleContainingIgnoreCase(title)
                 .stream()
-                .map(TaskResponse::fromEntity) // ✅ fixed
+                .map(TaskResponse::fromEntity)
                 .collect(Collectors.toList());
     }
 
     // ================= CREATE =================
 
     public Task createTask(TaskRequest request) {
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        User user = getUserOrThrow(request.getUserId());
 
         Task task = new Task();
         task.setTitle(request.getTitle());
@@ -93,7 +93,7 @@ public class TaskService {
         task.setPriority(parsePriority(request.getPriority()));
         task.setUser(user);
 
-        return TaskResponse.fromEntity(taskRepository.save(task)); // ✅ fixed
+        return TaskResponse.fromEntity(taskRepository.save(task));
     }
 
     // ================= DELETE =================
@@ -108,20 +108,20 @@ public class TaskService {
     private Task getTaskOrThrow(Long id) {
         return taskRepository.findById(id)
                 .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
+                        new EntityNotFoundException("Task with id " + id + " not found"));
     }
 
     private User getUserOrThrow(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+                        new EntityNotFoundException("User with id " + id + " not found"));
     }
 
     private TaskStatus parseStatus(String status) {
         try {
             return TaskStatus.valueOf(status.toUpperCase());
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status");
+            throw new IllegalArgumentException("Invalid status: " + status);
         }
     }
 
@@ -129,7 +129,7 @@ public class TaskService {
         try {
             return TaskPriority.valueOf(priority.toUpperCase());
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid priority");
+            throw new IllegalArgumentException("Invalid priority: " + priority);
         }
     }
 }

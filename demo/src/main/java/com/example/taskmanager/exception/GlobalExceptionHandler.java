@@ -21,71 +21,68 @@ public class GlobalExceptionHandler {
 
     // 404 - Task not found
     @ExceptionHandler(TaskNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleTaskNotFound(
+    public ResponseEntity<ErrorResponse> handleTaskNotFound(
             TaskNotFoundException ex,
             HttpServletRequest request
     ) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("timestamp", LocalDateTime.now());
-        error.put("status", 404);
-        error.put("error", "Not Found");
-        error.put("message", ex.getMessage());
-        error.put("path", request.getRequestURI());
-
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
+    // 404 - Generic entity not found
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleEntityNotFound(
+            EntityNotFoundException ex,
+            HttpServletRequest request) {
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.NOT_FOUND.value(),
+                "Not Found",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+
     // 400 - Validation errors
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationErrors(
-            MethodArgumentNotValidException ex,
-            HttpServletRequest request
-    ) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("timestamp", LocalDateTime.now());
-        error.put("status", 400);
-        error.put("error", "Bad Request");
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(
+            IllegalArgumentException ex,
+            HttpServletRequest request) {
 
-        // Collect all field errors
-        Map<String, String> fieldErrors = ex.getBindingResult().getFieldErrors()
-                .stream()
-                .collect(Collectors.toMap(
-                        f -> f.getField(),
-                        f -> f.getDefaultMessage()
-                ));
-        error.put("message", fieldErrors);
-        error.put("path", request.getRequestURI());
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
 
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
     // 500 - Any unexpected error
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneralException(
+    public ResponseEntity<ErrorResponse> handleGeneralException(
             Exception ex,
             HttpServletRequest request
     ) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("timestamp", LocalDateTime.now());
-        error.put("status", 500);
-        error.put("error", "Internal Server Error");
-        error.put("message", ex.getMessage());
-        error.put("path", request.getRequestURI());
-
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Internal Server Error",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-    @ExceptionHandler(EntityNotFoundException.class)  // Use your specific exception class
-    public ResponseEntity<Map<String, Object>> handleEntityNotFound(
-            EntityNotFoundException ex,
-            HttpServletRequest request
-    ) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("timestamp", LocalDateTime.now());
-        error.put("status", 404);
-        error.put("error", "Not Found");
-        error.put("message", "does not exist in the database");
-        error.put("path", request.getRequestURI());
-
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 }

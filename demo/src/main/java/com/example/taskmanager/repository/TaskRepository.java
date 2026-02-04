@@ -17,7 +17,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     // TODO: Optional isn't semantically correct on a list, empty list is a vlid state
     // not used so just remove
-    Optional<List<Task>> findAllByUser(User user);
+
+    List<Task> findAllByUser(User user);
 
     List<Task> findByStatus(TaskStatus status);
 

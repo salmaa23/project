@@ -3,6 +3,7 @@ package com.example.taskmanager.rest;
 import com.example.taskmanager.dto.TaskRequest;
 import com.example.taskmanager.dto.TaskResponse;
 import com.example.taskmanager.service.TaskService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,35 +43,44 @@ public class TaskController {
     //TODO: Filter params should be query parameters, not path segments --> STATUS
 
     // GET tasks by status
-    @GetMapping("/status/{status}")
-    public List<TaskResponse> getTasksByStatus(@PathVariable String status) {
-        return taskService.getTasksByStatus(status);
+    public ResponseEntity<List<TaskResponse>> getTasks(
+            @RequestParam(required = false) String status) {
+
+        List<TaskResponse> tasks;
+
+        if (status != null) {
+            tasks = taskService.getTasksByStatus(status);
+        } else {
+            tasks = taskService.getAllTasks();
+        }
+
+        return ResponseEntity.ok(tasks);
     }
 
     // SEARCH by title
     @GetMapping("/search")
-    public List<TaskResponse> searchByTitle(@RequestParam String title) {
-        return taskService.searchByTitle(title);
+    public ResponseEntity<List<TaskResponse>> searchByTitle(@RequestParam String title) {
+        List<TaskResponse> tasks = taskService.searchByTitle(title);
+        return ResponseEntity.ok(tasks);
     }
-
 
 
     //TODO: Use @valid on request bodies, so validation annotations would work on request class
 
     // CREATE task
     @PostMapping
-    public ResponseEntity<TaskResponse> createTask(@RequestBody TaskRequest request) {
-        Task task = taskService.createTask(request);           // save entity
-        TaskResponse response = TaskResponse.fromEntity(task); // convert to DTO
+    public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody TaskRequest request) {
+        TaskResponse response = TaskResponse.fromEntity(taskService.createTask(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    // ================= UPDATE =================
 
-    // UPDATE task
     @PutMapping("/{id}")
-    public TaskResponse updateTask(@PathVariable Long id,
-                                   @RequestBody TaskRequest request) {
-        return taskService.updateTask(id, request);
+    public ResponseEntity<TaskResponse> updateTask(@PathVariable Long id,
+                                                   @Valid @RequestBody TaskRequest request) {
+        TaskResponse updated = taskService.updateTask(id, request);
+        return ResponseEntity.ok(updated);
     }
 
     // DELETE task

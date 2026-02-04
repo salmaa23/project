@@ -1,5 +1,8 @@
 package com.example.taskmanager.service;
 
+import com.example.taskmanager.dto.UserRequest;
+import com.example.taskmanager.dto.UserResponse;
+import com.example.taskmanager.model.Role;
 import com.example.taskmanager.model.User;
 import com.example.taskmanager.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -7,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -18,45 +22,79 @@ public class UserService {
     }
 
     // ---------------- GET ALL USERS ----------------
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(UserResponse::fromEntity)
+                .collect(Collectors.toList());
     }
 
+
     // ---------------- GET USER BY ID ----------------
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
+    public UserResponse getUserById(Long id) {
+        User user = userRepository.findById(id)
                 .orElseThrow(() ->
                         new EntityNotFoundException(
                                 "User with id " + id + " does not exist in the database"
                         )
                 );
+        return UserResponse.fromEntity(user);
     }
 
     // ---------------- CREATE USER ----------------
-    public User createUser(User user) {
+
+    //            TODO: roles should be saved in an enum class and reused throughout
+    public UserResponse createUser(UserRequest request) {
+        User user = request.toEntity(); // convert DTO to entity
+
+        // Ensure default role if none provided
         if (user.getRoles() == null || user.getRoles().isEmpty()) {
-//            TODO: roles should be saved in an enum class and reused throughout
-            user.setRoles(Set.of("ROLE_USER"));
+            user.setRoles(Set.of(Role.ROLE_USER));
         }
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return UserResponse.fromEntity(savedUser);
     }
 
     // ---------------- UPDATE USER ----------------
-    public User updateUser(Long id, User updatedUser) {
-        User user = getUserById(id);
+    public UserResponse updateUser(Long id, UserRequest request) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new EntityNotFoundException(
+                                "User with id " + id + " does not exist in the database"
+                        )
+                );
 
-        user.setUsername(updatedUser.getUsername());
-        user.setEmail(updatedUser.getEmail());
-        user.setPassword(updatedUser.getPassword());
-        user.setRoles(updatedUser.getRoles());
+        User updatedUser = request.toEntity(); // DTO -> entity
+        existingUser.setUsername(updatedUser.getUsername());
+        existingUser.setEmail(updatedUser.getEmail());
+        existingUser.setPassword(updatedUser.getPassword());
 
-        return userRepository.save(user);
+        // Update roles properly
+        if (updatedUser.getRoles() != null && !updatedUser.getRoles().isEmpty()) {
+            existingUser.setRoles(updatedUser.getRoles());
+        }
+
+        User savedUser = userRepository.save(existingUser);
+        return UserResponse.fromEntity(savedUser);
     }
 
     // ---------------- DELETE USER ----------------
     public void deleteUser(Long id) {
-        User user = getUserById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() ->
+                        new EntityNotFoundException(
+                                "User with id " + id + " does not exist in the database"
+                        )
+                );
         userRepository.delete(user);
     }
+    // ---------------- GET ALL USERS WITH TASKS ----------------
+    public List<UserResponse> getAllUsersWithTasks() {
+        return userRepository.findAll()
+                .stream()
+                .map(UserResponse::fromEntity) // tasks are included in mapping
+                .collect(Collectors.toList());
+    }
 }
+
