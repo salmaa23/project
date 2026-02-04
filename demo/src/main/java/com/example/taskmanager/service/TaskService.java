@@ -13,6 +13,11 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+    //TODO: Inconsistent exception strategy in services
+    //  UserService throws EntityNotFoundException (JPA's). TaskService throws ResponseStatusException. Two different patterns for the same "not found" scenario across two services
+    //  in the same app.
+    // Use EntityNotFoundException for consistency
+
 @Service
 public class TaskService {
 
@@ -99,7 +104,7 @@ public class TaskService {
     }
 
     // ================= HELPERS =================
-
+    //TODO: throw task not found exception to use its handler method in GlobalExceptionHandler
     private Task getTaskOrThrow(Long id) {
         return taskRepository.findById(id)
                 .orElseThrow(() ->

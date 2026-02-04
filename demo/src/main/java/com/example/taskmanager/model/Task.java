@@ -1,6 +1,5 @@
 package com.example.taskmanager.model;
 
-import com.example.taskmanager.model.Task;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 

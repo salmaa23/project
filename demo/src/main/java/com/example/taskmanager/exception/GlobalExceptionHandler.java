@@ -17,6 +17,8 @@ import java.util.stream.Collectors;  // <-- Add this
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    //TODO: USE ERROR response class u have instead of building Map manually
+
     // 404 - Task not found
     @ExceptionHandler(TaskNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleTaskNotFound(

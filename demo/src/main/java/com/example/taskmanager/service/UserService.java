@@ -35,6 +35,7 @@ public class UserService {
     // ---------------- CREATE USER ----------------
     public User createUser(User user) {
         if (user.getRoles() == null || user.getRoles().isEmpty()) {
+//            TODO: roles should be saved in an enum class and reused throughout
             user.setRoles(Set.of("ROLE_USER"));
         }
 

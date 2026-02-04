@@ -37,6 +37,10 @@ public class TaskController {
         return taskService.getTasksByUserId(userId);
     }
 
+
+
+    //TODO: Filter params should be query parameters, not path segments --> STATUS
+
     // GET tasks by status
     @GetMapping("/status/{status}")
     public List<TaskResponse> getTasksByStatus(@PathVariable String status) {
@@ -49,6 +53,9 @@ public class TaskController {
         return taskService.searchByTitle(title);
     }
 
+
+
+    //TODO: Use @valid on request bodies, so validation annotations would work on request class
 
     // CREATE task
     @PostMapping

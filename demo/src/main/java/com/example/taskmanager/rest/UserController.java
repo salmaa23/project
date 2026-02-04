@@ -13,6 +13,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+
+//TODO: Inconsistent base path conventions either make it all /api/****** like in TaskController
+
+// TODO: Lombok inconsistency
+// TaskController uses @RequiredArgsConstructor (Lombok). UserController and UserService use manual constructor injection.
+// Use lombok throughout for less boilerplate
+
 @RequestMapping("/users")
 public class UserController {
 
@@ -28,6 +35,9 @@ public class UserController {
     public ResponseEntity<UserResponse> createUser(
             @Valid @RequestBody UserRequest request
     ) {
+
+        //TODO: any business logic should be in service layer, mapping included
+
         // DTO -> Entity
         User user = request.toEntity();
 

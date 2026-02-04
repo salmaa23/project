@@ -17,6 +17,9 @@ import java.util.Set;
                 @UniqueConstraint(columnNames = "email")
         }
 )
+
+//TODO: use lombok for setters and getters for less boilerplate
+//Entity operations should be handled from repo and service layer, and not entity layer.
 public class User {
 
     @Id
