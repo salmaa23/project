@@ -6,6 +6,7 @@ import com.example.taskmanager.model.Role;
 import com.example.taskmanager.model.User;
 import com.example.taskmanager.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,7 +30,6 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-
     // ---------------- GET USER BY ID ----------------
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
@@ -42,8 +42,6 @@ public class UserService {
     }
 
     // ---------------- CREATE USER ----------------
-
-    //            TODO: roles should be saved in an enum class and reused throughout
     public UserResponse createUser(UserRequest request) {
         User user = request.toEntity(); // convert DTO to entity
 
@@ -89,6 +87,7 @@ public class UserService {
                 );
         userRepository.delete(user);
     }
+
     // ---------------- GET ALL USERS WITH TASKS ----------------
     public List<UserResponse> getAllUsersWithTasks() {
         return userRepository.findAll()
@@ -96,5 +95,28 @@ public class UserService {
                 .map(UserResponse::fromEntity) // tasks are included in mapping
                 .collect(Collectors.toList());
     }
-}
 
+    // ---------------- CHECK EXISTENCE ----------------
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    // ---------------- SAVE USER DIRECTLY ----------------
+    // Used by /auth/register
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
+    // ---------------- FIND USER BY USERNAME ----------------
+    // Used for login / JWT authentication
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User not found: " + username)
+                );
+    }
+}

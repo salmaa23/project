@@ -1,5 +1,6 @@
 package com.example.taskmanager.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -18,9 +19,6 @@ import java.util.Set;
                 @UniqueConstraint(columnNames = "email")
         }
 )
-
-//TODO: use lombok for setters and getters for less boilerplate
-//Entity operations should be handled from repo and service layer, and not entity layer.
 @Getter
 @Setter
 @NoArgsConstructor
@@ -42,6 +40,7 @@ public class User {
     @Column(nullable = false, length = 100)
     private String email;
 
+    @JsonIgnore
     @NotBlank
     @Size(min = 6)
     @Column(nullable = false)
@@ -53,14 +52,26 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(
+            mappedBy = "user",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private Set<Task> tasks = new HashSet<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id")
+    )
     @Enumerated(EnumType.STRING)
-    @Column(name = "role")
+    @Column(name = "role", nullable = false)
     private Set<Role> roles = new HashSet<>();
+
+    /* =====================
+       JPA lifecycle hooks
+       ===================== */
 
     @PrePersist
     protected void onCreate() {
@@ -74,7 +85,10 @@ public class User {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Helper methods
+    /* =====================
+       Helper methods
+       ===================== */
+
     public void addTask(Task task) {
         tasks.add(task);
         task.setUser(this);
@@ -93,9 +107,11 @@ public class User {
         roles.remove(role);
     }
 
+    // Convenience constructor
     public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.roles = new HashSet<>();
     }
 }
